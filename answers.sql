@@ -13,30 +13,24 @@ CREATE TABLE ProductDetail (
 );
 
 INSERT INTO ProductDetail (OrderID, CustomerName, Products) VALUES
-(101, 'John Doe', 'Laptop, Mouse'),
-(102, 'Jane Smith', 'Tablet, Keyboard, Mouse'),
+(101, 'John Doe', 'Laptop'),
+(101, 'John Doe', 'Mouse'),
+(102, 'Jane Smith', 'Tablet'),
+(102, 'Jane Smith', 'Mouse'),
 (103, 'Emily Clark', 'Phone');
 
 -- Creating the new normalized table
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerName VARCHAR(100)
+);
+
 CREATE TABLE Products (
     ProductID INT AUTO_INCREMENT PRIMARY KEY,
     OrderID INT,
     Product VARCHAR(100),
     FOREIGN KEY (OrderID) REFERENCES ProductDetail(OrderID)
 );
-
--- Insert split values from ProductDetail.Products into Products
-INSERT INTO Products (OrderID, Product)
-SELECT 
-    pd.OrderID,
-    TRIM(jt.Product) AS Product
-FROM 
-    ProductDetail pd,
-    JSON_TABLE(
-        CONCAT('["', REPLACE(pd.Products, ', ', '","'), '"]'),
-        '$[*]' COLUMNS (Product VARCHAR(100) PATH '$')
-    ) AS jt;
-
 
 -- TASK 2: Achieving 2NF
 
@@ -63,8 +57,13 @@ CREATE TABLE Orders (
 );
 
 INSERT INTO Orders (OrderID, CustomerName)
-SELECT DISTINCT OrderID, CustomerName
-FROM OrderDetails;
+VALUES
+(101, 'John Doe'),
+(102, 'Jane Smith'),
+(103, 'Emily Clark');
+
+-- SELECT DISTINCT OrderID, CustomerName
+-- FROM OrderDetails;
 
 -- Creating OrderProducts table
 CREATE TABLE OrderProducts (
@@ -76,6 +75,14 @@ CREATE TABLE OrderProducts (
 );
 
 INSERT INTO OrderProducts (OrderID, Product, Quantity)
-SELECT OrderID, Product, Quantity
-FROM OrderDetails;
+VALUES
+(101, 'Laptop', 2),
+(101, 'Mouse', 1),
+(102, 'Tablet', 3),
+(102, 'Keyboard', 1),
+(102, 'Mouse', 2),
+(103, 'Phone', 1);
+
+-- SELECT OrderID, Product, Quantity
+-- FROM OrderDetails;
 
